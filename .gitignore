@@ -286,3 +286,7 @@ android_project
 dists/emscripten/libs/
 dists/emscripten/games/
 dists/emscripten/emsdk-*
+
+#Ignore WebOS build artifacts
+/dist-webos
+/org.scummvm_*.ipk

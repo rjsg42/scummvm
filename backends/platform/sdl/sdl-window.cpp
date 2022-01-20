@@ -353,6 +353,7 @@ bool SdlWindow::createOrUpdateWindow(int width, int height, uint32 flags) {
 	Common::Rect desktopRes = getDesktopResolution();
 	if (!fullscreenFlags) {
 		int top, left, bottom, right;
+#ifndef WEBOS
 #if SDL_VERSION_ATLEAST(2, 0, 5)
 		if (!_window || SDL_GetWindowBordersSize(_window, &top, &left, &bottom, &right) < 0)
 #endif
@@ -360,6 +361,9 @@ bool SdlWindow::createOrUpdateWindow(int width, int height, uint32 flags) {
 			left = right = 10;
 			top = bottom = 15;
 		}
+#else
+		top = left = bottom = right = 0;
+#endif
 		desktopRes.right -= (left + right);
 		desktopRes.bottom -= (top + bottom);
 	}

@@ -1742,6 +1742,11 @@ wii)
 	_host_cpu=powerpc
 	_host_alias=powerpc-eabi
 	;;
+webos)
+	_host_os=webos
+	_host_cpu=arm
+	_host_alias=arm-webos-linux-gnueabi
+	;;
 *)
 	if test -n "$_host"; then
 		guessed_host=`$_srcdir/config.sub $_host`
@@ -1883,6 +1888,12 @@ riscos)
 		add_line_to_config_mk "TOKENIZE := $GCCSDK_INSTALL_ENV/bin/tokenize"
 	elif `which tokenize >/dev/null 2>&1`; then
 		add_line_to_config_mk "TOKENIZE := tokenize"
+	fi
+	;;
+webos)
+	if test -z "$OECORE_TARGET_SYSROOT"; then
+		echo "Please source the environment-setup script of your WebOS SDK."
+		exit 1
 	fi
 	;;
 *)
@@ -3608,6 +3619,13 @@ if test -n "$_host"; then
 			_vkeybd=yes
 			_port_mk="backends/platform/sdl/switch/switch.mk"
 			;;
+		webos)
+			_backend="webos"
+			_opengl_mode=gles2
+			_opengl_game=yes
+			_opengl_game_es2=yes
+			_vkeybd=yes
+			;;
 		wii)
 			_backend="wii"
 			_build_scalers=no
@@ -3773,6 +3791,15 @@ case $_backend in
 	switch)
 		_sdl=auto
 		append_var MODULES "backends/platform/sdl"
+		;;
+	webos)
+		_sdl=yes
+		_sdlversion=2.0.0
+		append_var INCLUDES "-I$OECORE_TARGET_SYSROOT/usr/include/SDL2"
+		append_var LIBS "-lSDL2"
+		append_var MODULES "backends/platform/sdl"
+		append_var DEFINES "-DWEBOS"
+		append_var DEFINES "-DDISABLE_COMMAND_LINE"
 		;;
 	wii)
 		append_var DEFINES "-D__WII__"
@@ -3998,7 +4025,7 @@ case $_host_os in
 	amigaos* | cygwin* | dreamcast | ds | gamecube | mingw* | morphos | n64 | ps3 | psp2 | psp | riscos | wii)
 		_posix=no
 		;;
-	3ds | android | androidsdl | beos* | bsd* | darwin* | freebsd* | gnu* | gph-linux | haiku* | hpux* | iphone | ios7 | irix*| k*bsd*-gnu* | linux* | maemo | mint* | netbsd* | openbsd* | solaris* | sunos* | switch | uclinux*)
+	3ds | android | androidsdl | beos* | bsd* | darwin* | freebsd* | gnu* | gph-linux | haiku* | hpux* | iphone | ios7 | irix*| k*bsd*-gnu* | linux* | maemo | mint* | netbsd* | openbsd* | solaris* | sunos* | switch | uclinux* | webos)
 		_posix=yes
 		;;
 	os2-emx*)
@@ -5384,7 +5411,10 @@ if test "$_opengl_mode" = auto ; then
 					;;
 			esac
 			;;
-
+		webos)
+			_opengl_mode=gles2
+			_opengl_glad=yes
+			;;
 		*)
 			_opengl_mode=none
 			;;

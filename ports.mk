@@ -557,5 +557,47 @@ endif
 	@echo Now run
 	@echo -e "\tgit commit -m 'DISTS: Generated Code::Blocks and MSVC project files'"
 
+# Special target to create a WebOS package.
+ifeq ($(BACKEND),webos)
+define APPINFO
+{
+    "id": "org.scummvm",
+    "version": "$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)",
+    "vendor": "webosbrew.org",
+    "title": "ScummVM",
+    "icon": "icon160.png",
+    "main": "$(EXECUTABLE)",
+    "iconColor": "#cd6502",
+    "type": "native",
+    "appDescription": "Play certain classic graphical point-and-click adventure games"
+}
+endef
+export APPINFO
+ipk: $(EXECUTABLE) $(DIST_FILES_THEMES)
+	rm -rf dist-webos
+	$(INSTALL) -d dist-webos/lib
+	echo "$$APPINFO" > dist-webos/appinfo.json
+	$(INSTALL) -c -m 755 $(EXECUTABLE) dist-webos/
+	$(INSTALL) -c -m 644 \
+		$(DIST_FILES_THEMES) \
+		$(DIST_FILES_NETWORKING) \
+		$(DIST_FILES_VKEYBD) \
+		$(DIST_FILES_ENGINEDATA) \
+		dists/webos/icon160.png \
+		dist-webos/
+	$(INSTALL) -c -m 755 \
+		$(OECORE_TARGET_SYSROOT)/usr/lib/libstdc++.so.6 \
+		$(OECORE_TARGET_SYSROOT)/usr/lib/libjpeg.so.62 \
+		$(OECORE_TARGET_SYSROOT)/usr/lib/libtheoradec.so.1 \
+		dist-webos/lib
+ifneq ($(DIST_FILES_SHADERS),)
+	$(INSTALL) -d dist-webos/shaders
+	$(INSTALL) -c -m 644 $(DIST_FILES_SHADERS) dist-webos/shaders/
+endif
+	$(STRIP) dist-webos/$(EXECUTABLE)
+	$(STRIP) dist-webos/lib/*.so*
+	ares-package dist-webos
+endif
+
 # Mark special targets as phony
 .PHONY: deb bundle osxsnap install uninstall
